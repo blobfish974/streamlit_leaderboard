@@ -53,5 +53,5 @@ st.altair_chart(alt.Chart(source).mark_bar().encode(
     y=alt.Y('names', sort='descending'),
 ))
 
-# source.sort_values(by=["scores"], inplace=True, ascending=False)
-# source
+source.sort_values(by=["scores"], inplace=True, ascending=False)
+source
