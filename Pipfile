@@ -8,6 +8,7 @@ bs4 = "*"
 requests = "*"
 altair = "*"
 pandas = "*"
+selenium = "*"
 
 [dev-packages]
 
