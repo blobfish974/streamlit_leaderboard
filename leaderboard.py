@@ -10,10 +10,14 @@ st.text(" \n")
 
 
 col1, col2, col3 = st.columns(3)
+# img_root_me = Image.open(
+#     "D:/programming/projects/root_me_leaderboard/root-me.png")
 img_root_me = Image.open(
-    "D:/programming/projects/root_me_leaderboard/root-me.png")
+    "root-me.png")
+# img_telecom = Image.open(
+#     "D:/programming/projects/root_me_leaderboard/logo_telecom.png")
 img_telecom = Image.open(
-    "D:/programming/projects/root_me_leaderboard/logo_telecom.png")
+    "logo_telecom.png")
 # with col1:
 #     st.image(img_root_me, width=200)
 with col2:
