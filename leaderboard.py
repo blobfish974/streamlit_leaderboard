@@ -123,7 +123,6 @@ df_ranking = pd.DataFrame({
 df_ranking.sort_values(by=["scores"], inplace=True, ascending=False)
 df_ranking = df_ranking.reset_index(drop=True)
 df_ranking.index = df_ranking.index + 1
-df_ranking
 
 st.altair_chart(alt.Chart(df_ranking).mark_bar().encode(
     x='scores',
@@ -143,6 +142,9 @@ df_scores = df_scores.set_index('date')
 
 st.header("Score evolution")
 st.line_chart(df_scores)
+st.header("Score evolution last month")
+df_scores_last_month = df_scores.iloc[-30:, :]
+st.line_chart(df_scores_last_month)
 
 st.subheader("Ranking table")
 df_ranking
