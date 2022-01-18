@@ -2,7 +2,8 @@
 > Root-me leaderboard using streamlit
 
 Just for fun!
-![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/blobfish974/streamlit_leaderboard/main/leaderboard.py)
+
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://share.streamlit.io/blobfish974/streamlit_leaderboard/main/leaderboard.py)
 
 
 

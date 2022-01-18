@@ -44,68 +44,75 @@ end_dt = date.today()
 date_list = list()
 for dt in daterange(start_dt, end_dt):
     date_list.append(dt)
-    # print(dt.strftime("%Y-%m-%d"))
-# print(date_list)
 num_dates = len(date_list)
 
 
-data_names = ["pieacoulisse", "Miaimbouchon","BOUCENNA", "fdn4444","miled","Caroline", "Pompottewi","Arsuol","Yves-Marie"]
-data_score = list()
-all_scores = np.zeros((num_dates, len(data_names)))
+data_names = ["pieacoulisse", "Miaimbouchon", "BOUCENNA", "fdn4444",
+              "miled", "Caroline", "Pompottewi", "Arsuol", "Yves-Marie"]
 len_data_names = len(data_names)
+data_score = list()
+# matrix to store all points for each date
+all_scores = np.zeros((num_dates, len(data_names)))
 
 
 pattern = "validations.push\({(.+?),[\s]*}\);"
 
 
+print("*** Updating datas ***")
 for index, name in enumerate(data_names):
+    print("Fetching " + name + "...")
     url = "https://www.root-me.org/" + name + "?inc=statistiques&lang=fr"
     response = requests.get(url)
     html = response.content
     soup = bs(html, 'html.parser')
     h3 = soup.find_all('h3')
-    points = int(h3[5].getText().strip())
-    # challenges_done = h3[5].getText().strip()
-    script = soup.find_all('script', src=None)
-    raw_validation_push = re.findall(pattern, script[-1].string, re.S)
-    json_struct = json.loads("[ ]")
-    if raw_validation_push:
-        for i in range(len(raw_validation_push)):
-            raw_validation_push[i] = re.sub(
-                r"'titre'\s*:.*", " ", raw_validation_push[i])
-            json_string = "{" + \
-                raw_validation_push[i].replace('\'', '\"') + "\n}"
-            # print(json_string)
-            data = json.loads(json_string)
-            json_struct.append(data)
-            print("Success")
-        # print(json_struct)
-        # Constructing the data array for points according to dates
-        score_sum = 0
-        scores = [0] * num_dates
-        for x in json_struct:
-            date_time_str = x["date"]
-            date_time_obj = datetime.strptime(
-                date_time_str, '%Y-%m-%d %H:%M:%S')
-            if(date_time_obj.date() in date_list):
-                index_date = date_list.index(date_time_obj.date())
-            else:  # it happens when the user had points before the start date
-                print("Index not found for " +
-                      date_time_obj.date().strftime("%Y-%m-%d"))
-                index_date = 0
-            score_sum += int(x["score"])
-            for j in range(index_date, num_dates):
-                scores[j] = score_sum
-        print(scores)
-        all_scores[:, index] = scores
-
+    try:
+        points = int(h3[5].getText().strip())
+    except:
+        print("Error getting score")
+        data_score.append(0)
+        continue
     else:
-        print("Error get stats points")
+        # challenges_done = h3[5].getText().strip()
+        script = soup.find_all('script', src=None)
+        raw_validation_push = re.findall(pattern, script[-1].string, re.S)
+        json_struct = json.loads("[ ]")
+        if raw_validation_push:
+            for i in range(len(raw_validation_push)):
+                raw_validation_push[i] = re.sub(
+                    r"'titre'\s*:.*", " ", raw_validation_push[i])
+                json_string = "{" + \
+                    raw_validation_push[i].replace('\'', '\"') + "\n}"
+                # print(json_string)
+                data = json.loads(json_string)
+                json_struct.append(data)
+                # print("Success")
+            # print(json_struct)
+            # Constructing the data array for points according to dates
+            score_sum = 0
+            scores = [0] * num_dates
+            for x in json_struct:
+                date_time_str = x["date"]
+                date_time_obj = datetime.strptime(
+                    date_time_str, '%Y-%m-%d %H:%M:%S')
+                if(date_time_obj.date() in date_list):
+                    index_date = date_list.index(date_time_obj.date())
+                else:  # it happens when the user had points before the start date
+                    # print("Index not found for " +
+                    #       date_time_obj.date().strftime("%Y-%m-%d"))
+                    index_date = 0
+                score_sum += int(x["score"])
+                for j in range(index_date, num_dates):
+                    scores[j] = score_sum
+            all_scores[:, index] = scores
 
-    data_score.append(points)
-    prog = int((index+1)*100/len_data_names)
-    status_text.text("%i%% Complete" % prog)
-    my_bar.progress(prog)
+        else:
+            print("Error getting stats points")
+
+        data_score.append(points)
+        prog = int((index+1)*100/len_data_names)
+        status_text.text("%i%% Complete" % prog)
+        my_bar.progress(prog)
 
 my_bar.empty()
 
@@ -113,11 +120,16 @@ df_ranking = pd.DataFrame({
     'names': data_names,
     'scores': data_score
 })
+df_ranking.sort_values(by=["scores"], inplace=True, ascending=False)
+df_ranking = df_ranking.reset_index(drop=True)
+df_ranking.index = df_ranking.index + 1
+df_ranking
 
 st.altair_chart(alt.Chart(df_ranking).mark_bar().encode(
     x='scores',
     # y='names',
-    y=alt.Y('names', sort='descending'),
+    # y=alt.Y('names', sort='descending'),
+    y=alt.Y('names', sort=None),
 ))
 
 
@@ -133,7 +145,6 @@ st.header("Score evolution")
 st.line_chart(df_scores)
 
 st.subheader("Ranking table")
-df_ranking.sort_values(by=["scores"], inplace=True, ascending=False)
 df_ranking
 st.subheader("Score evolution table")
 df_scores
