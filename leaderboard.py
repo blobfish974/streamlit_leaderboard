@@ -49,7 +49,7 @@ for dt in daterange(start_dt, end_dt):
 num_dates = len(date_list)
 
 
-data_names = ["pieacoulisse", "Miaimbouchon"]
+data_names = ["pieacoulisse", "Miaimbouchon","BOUCENNA", "fdn4444","miled","Caroline", "Pompottewi","Arsuol","Yves-Marie"]
 data_score = list()
 all_scores = np.zeros((num_dates, len(data_names)))
 len_data_names = len(data_names)
