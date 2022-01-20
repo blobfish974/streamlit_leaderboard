@@ -209,12 +209,17 @@ def update():
 
     # print(time.ctime())
     file = open("updated_file.txt", "w")
-    now = datetime.now()
+    now = datetime.now() + timedelta(hours=1)
     file.write(now.strftime("%d/%m/%Y %H:%M:%S"))
     # threading.Timer(WAIT_SECONDS, foo).start()
     print("...waiting...")
     time.sleep(WAIT_SECONDS)
     update()
+
+
+st.text(" \n")
+st.text(" \n")
+st.text("Update logs")
 
 
 print("Calling updating function")
