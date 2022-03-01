@@ -1,4 +1,4 @@
-import leaderboard_time_updated
+import leaderboard_update_ranking
 import altair as alt
 import pandas as pd
 from PIL import Image
@@ -16,8 +16,6 @@ st.set_page_config(
     page_icon="images/trophy.png",
 )
 
-leaderboard_time_updated.foo()
-# execfile('time_file')
 st.title('Root-me leaderboard')
 st.text(" \n")
 
@@ -50,9 +48,8 @@ for dt in daterange(start_dt, end_dt):
     date_list.append(dt)
 num_dates = len(date_list)
 
-
-data_names = ["pieacoulisse", "Miaimbouchon", "BOUCENNA", "fdn4444",
-              "miled", "Caroline-637442", "Pompottewi", "Arsuol", "Yves-Marie"]
+data_names = ["pieacoulisse", "Miaimbouchon", "BOUCENNA", "fdn4444", "miled", "Caroline-46821",
+              "Pompottewi", "Arsuol", "Yves-Marie", "Keyoke", "giso", "Yasuotarie", "Nyco"]
 len_data_names = len(data_names)
 data_score = list()
 # matrix to store all points for each date
