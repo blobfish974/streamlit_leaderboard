@@ -11,13 +11,12 @@ from datetime import datetime, timedelta, date
 import numpy as np
 from bs4 import BeautifulSoup as bs
 
-print("import")
-
 WAIT_SECONDS = 60 * 1  # update every 10 minutes
 
 st.set_page_config(
     page_title="Leaderboard",
     page_icon="images/trophy.png",
+    layout="wide"
 )
 
 st.title('Root-me leaderboard')
