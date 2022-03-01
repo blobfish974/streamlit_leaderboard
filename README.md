@@ -29,4 +29,14 @@ If you need to install a package:
 ```sh
 ❯ pipenv install <package_name>
 ```
+
+If you need to run a python script by itself:
+```sh
+❯ pipenv run python <file_name.py>
+```
+or if you ran pipenv shell before:
+```sh
+❯ python <file_name.py>
+```
+
 And don't forget to add it to [requirements.txt](requirements.txt)!
