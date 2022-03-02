@@ -3,6 +3,20 @@ import altair as alt
 from PIL import Image
 import util
 
+
+def display_evolution_metrics():
+    df = util.scores_last_month_evolution_dataframe()
+    col1, col2, col3 = st.columns(3)
+    col1.metric(df.iloc[0]['names'], str(df.iloc[0]
+                ['end_value']), "+"+str(df.iloc[0]['progress']))
+    col2.metric(df.iloc[1]['names'], str(df.iloc[1]
+                ['end_value']), "+"+str(df.iloc[1]['progress']))
+    col3.metric(df.iloc[2]['names'], str(df.iloc[2]
+                ['end_value']), "+"+str(df.iloc[2]['progress']))
+    # print(df.iloc[0]['names'])
+    return
+
+
 st.set_page_config(
     page_title="Leaderboard",
     page_icon="images/trophy.png",
@@ -36,14 +50,15 @@ if(data_loaded):
         height=400
     ))
     # TODO: add bigger cursor
-    # TODO: make figure higher
     st.header("Score evolution")
     st.line_chart(util.scores_dataframe(), width=500, height=600)
     st.header("Score evolution last month")
+    display_evolution_metrics()
     st.line_chart(util.scores_last_month_dataframe(), width=500, height=600)
-    # TODO: add metrics for 3 best progression over last month
     st.subheader("Ranking table")
-    st.dataframe(util.ranking_dataframe())
+    st.table(util.ranking_dataframe())
+    st.subheader("Score evolution last month table")
+    st.table(util.scores_last_month_evolution_dataframe())
     st.subheader("Score evolution table")
     st.dataframe(util.scores_dataframe())
 else:
@@ -53,4 +68,4 @@ else:
 # we print what is stored and update at the end (for next user/refresh)
 st.write("Data updating...")
 util.update_datas()
-# TODO: CRON or otherway to automate it
+# TODO: CRON or otherway to automate it -> crontab library

@@ -84,6 +84,32 @@ def scores_last_month_dataframe():
     return df_scores_last_month
 
 
+def scores_last_month_evolution_dataframe():
+    df_scores_last_month = df_scores.iloc[-30:, :]
+    progress = list()
+    start_value = list()
+    end_value = list()
+    data_col = df_scores_last_month.columns.to_list()
+    for col in data_col:
+        last_date_valid_index = df_scores_last_month.loc[:, [
+            col]].last_valid_index().to_pydatetime()
+        progress.append(
+            int(df_scores_last_month.loc[last_date_valid_index, col]-df_scores_last_month.iloc[0][col]))
+        start_value.append(int(df_scores_last_month.iloc[0][col]))
+        end_value.append(
+            int(df_scores_last_month.loc[last_date_valid_index, col]))
+    df_metrics = pd.DataFrame({
+        'names': data_col,
+        'progress': progress,
+        'start_value': start_value,
+        'end_value': end_value,
+    })
+    df_metrics.sort_values(
+        by=["progress"], inplace=True, ascending=False)
+    df_metrics = df_metrics.reset_index(drop=True)
+    return df_metrics
+
+
 def fetch_datas(status_text, my_bar):
     """
     fetch datas from the site and grab the scores 
@@ -146,6 +172,7 @@ def fetch_datas(status_text, my_bar):
             prog = int((index+1)*100/len_data_names)
             status_text.text("%i%% Complete" % prog)
             my_bar.progress(prog)
+    status_text.text("100% Complete, Please refresh the page :)")
     return [data_score, all_scores]
 
 
@@ -188,24 +215,29 @@ def update_df_scores(df, df_updated):
     :param df_updated: the fetched dataframe with new scores
     :return: a dataframe of the 2 combined
     """
-    # TODO; check that new values != 0 (when fetching error) -> update old values (otherwise errors could stay forever)
     print("Enter update_df_scores")
     if df.empty:
         return df_updated
     list_col_df = df.columns.to_list()
     list_col_df_updated = df_updated.columns.to_list()
     common_col = set(list_col_df) & set(list_col_df_updated)
-    last_index = df.index[-1].to_pydatetime()
-    last_index = last_index + timedelta(days=1)
     for col in list_col_df_updated:
+        last_index = df.index[-1].to_pydatetime()
         if col not in common_col:
             df = df.join(df_updated.loc[:, [col]])
         else:
+            # if the dataframe already has all the indexes
             if(df_updated.index[-1] in df.index):
-                # when we already appended the rows to the dataframe (otherwise duplicates appear)
-                df.loc[last_index:, [col]] = df_updated.loc[last_index:, [col]]
+                last_date_valid_index = df.loc[:, [
+                    col]].last_valid_index().to_pydatetime()
+                # we check that there is no Nan value for an index before and for that column
+                # if not we do nothing (all good!)
+                if(last_index > last_date_valid_index):
+                    df.loc[last_date_valid_index:, [col]
+                           ] = df_updated.loc[last_date_valid_index:, [col]]
             else:
-                df = df.append(df_updated.loc[last_index:, [col]])
+                df = df.append(
+                    df_updated.loc[last_index + timedelta(days=1):, [col]])
     return df
 
 
