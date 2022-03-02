@@ -7,7 +7,7 @@ import re
 import requests
 from bs4 import BeautifulSoup as bs
 import numpy as np
-from os import path
+from os import path, mkdir
 from datetime import datetime, timedelta, date
 
 
@@ -67,6 +67,9 @@ def init_data():
         df_scores.index = pd.to_datetime(df_scores.index)
     else:
         result = False
+    if(not path.exists("data")):
+        mkdir("data")
+
     return result
 
 

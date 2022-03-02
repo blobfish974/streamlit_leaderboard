@@ -40,3 +40,7 @@ or if you ran pipenv shell before:
 ```
 
 And don't forget to add it to [requirements.txt](requirements.txt)!
+You can rebuild the Pipfile and Pipfile.lock with
+```sh
+❯ pipenv lock
+```
