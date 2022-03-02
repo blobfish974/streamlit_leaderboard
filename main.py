@@ -6,7 +6,7 @@ import util
 st.set_page_config(
     page_title="Leaderboard",
     page_icon="images/trophy.png",
-    layout="wide"
+    # layout="wide"
 )
 
 st.title('Root-me leaderboard')
@@ -26,7 +26,8 @@ st.text("Last update: " + util.read_last_update())
 st.text(" \n")
 
 st.header("Ranking of MS Cyber 2 2021-2022")
-
+# TODO: add bigger cursor
+# TODO: make figure higher
 st.altair_chart(alt.Chart(util.ranking_dataframe()).mark_bar().encode(
     x='scores',
     y=alt.Y('names', sort=None),
@@ -37,6 +38,7 @@ st.line_chart(util.scores_dataframe())
 
 st.header("Score evolution last month")
 st.line_chart(util.scores_last_month_dataframe())
+# TODO: add metrics for 3 best progression over last month
 
 st.subheader("Ranking table")
 st.dataframe(util.ranking_dataframe())
@@ -45,4 +47,6 @@ st.subheader("Score evolution table")
 st.dataframe(util.scores_dataframe())
 
 # we print what is stored and update at the end (for next user/refresh)
+st.write("Data updating...")
 util.update_datas()
+# TODO: CRON or otherway to automate it

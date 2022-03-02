@@ -22,9 +22,9 @@ for dt in daterange(date(2021, 9, 1), date.today()):
     date_list.append(dt)
 num_dates = len(date_list)
 
-# data_names = ["pieacoulisse", "Miaimbouchon", "BOUCENNA", "fdn4444", "miled", "Caroline-46821",
-#               "Pompottewi", "Arsuol", "Yves-Marie", "Keyoke", "giso", "Yasuotarie", "Nyco"]
-data_names = ["pieacoulisse"]
+data_names = ["pieacoulisse", "Miaimbouchon", "BOUCENNA", "fdn4444", "miled", "Caroline-46821",
+              "Pompottewi", "Arsuol", "Yves-Marie", "Keyoke", "giso", "Yasuotarie", "Nyco"]
+# data_names = ["pieacoulisse"]
 len_data_names = len(data_names)
 
 df_ranking = None
@@ -71,6 +71,9 @@ def scores_last_month_dataframe():
 
 
 def fetch_datas(status_text, my_bar):
+    """
+    function resilitent to fetch error (put 0)
+    """
     data_score = list()
     pattern = "validations.push\({(.+?),[\s]*}\);"
     all_scores = np.zeros((num_dates, len(data_names)))
@@ -90,7 +93,6 @@ def fetch_datas(status_text, my_bar):
             data_score.append(0)
             continue
         else:
-            # challenges_done = h3[5].getText().strip()
             script = soup.find_all('script', src=None)
             raw_validation_push = re.findall(pattern, script[-1].string, re.S)
             json_struct = json.loads("[ ]")
@@ -142,16 +144,21 @@ def update_df_ranking(df, df_updated):
             if(df_updated.loc[index, ['scores']]['scores'] != 0):
                 df.loc[index_name, ['scores']
                        ] = df_updated.loc[index, ['scores']]['scores']
+    df.sort_values(
+        by=["scores"], inplace=True, ascending=False)
+    df = df.reset_index(drop=True)
+    df.index = df.index + 1
     return df
 
 
 def update_df_scores(df, df_updated):
+    # TODO; check that new values != 0 (when fetching error)
     print("Enter update_df_scores")
-    # TODO: fix column deleted when user not fetched (or out of data_names array)
     list_col_df = df.columns.to_list()
     list_col_df_updated = df_updated.columns.to_list()
     common_col = set(list_col_df) & set(list_col_df_updated)
     last_index = df.index[-1].to_pydatetime()
+    last_index = last_index + timedelta(days=1)
     for col in list_col_df_updated:
         if col not in common_col:
             df = df.join(df_updated.loc[:, [col]])
@@ -165,6 +172,7 @@ def update_df_scores(df, df_updated):
 
 
 def update_datas():
+    global df_ranking, df_scores
     # fetch datas
     status_text = st.empty()
     my_bar = st.progress(0)
@@ -176,11 +184,7 @@ def update_datas():
         'names': data_names,
         'scores': data_score
     })
-    df_ranking_updated.sort_values(
-        by=["scores"], inplace=True, ascending=False)
-    df_ranking_updated = df_ranking_updated.reset_index(drop=True)
-    df_ranking_updated.index = df_ranking_updated.index + 1
-    update_df_ranking(df_ranking, df_ranking_updated)
+    df_ranking = update_df_ranking(df_ranking, df_ranking_updated)
     df_ranking.to_csv("data/df_ranking.csv", sep="\t")
 
     # Process scores
@@ -191,8 +195,8 @@ def update_datas():
     df_scores_updated['date'] = date_list
     df_scores_updated = df_scores_updated.set_index('date')
     df_scores_updated.index = pd.to_datetime(df_scores_updated.index)
-    update_df_scores(df_scores, df_scores_updated)
-    df_scores_updated.to_csv("data/df_scores.csv", sep="\t")
-    write_last_update()
+    df_scores = update_df_scores(df_scores, df_scores_updated)
+    df_scores.to_csv("data/df_scores.csv", sep="\t")
 
+    write_last_update()
     return
