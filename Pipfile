@@ -8,8 +8,9 @@ bs4 = "*"
 requests = "*"
 altair = "*"
 pandas = "*"
+numpy = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3.7.2"
