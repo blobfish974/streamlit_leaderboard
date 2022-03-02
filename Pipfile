@@ -7,10 +7,10 @@ name = "pypi"
 bs4 = "*"
 requests = "*"
 altair = "*"
-pandas = "*"
-numpy = "*"
+pandas = "1.2.5"
+numpy = "1.21.2"
 
 [dev-packages]
 
 [requires]
-python_version = "3.7.2"
+python_version = "3.7.12"
