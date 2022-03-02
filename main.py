@@ -69,3 +69,7 @@ else:
 st.write("Data updating...")
 util.update_datas()
 # TODO: CRON or otherway to automate it -> crontab library
+
+# About pipfiles
+# https://github.com/pypa/pipenv/blob/main/docs/advanced.rst
+# https://pipenv.pypa.io/en/latest/advanced/
