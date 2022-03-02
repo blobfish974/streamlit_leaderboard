@@ -21,30 +21,34 @@ img_telecom = Image.open(
 with col2:
     st.image([img_root_me, img_telecom], width=100)
 
-util.init_data()
+data_loaded = util.init_data()
 st.text("Last update: " + util.read_last_update())
 st.text(" \n")
 
-st.header("Ranking of MS Cyber 2 2021-2022")
-# TODO: add bigger cursor
-# TODO: make figure higher
-st.altair_chart(alt.Chart(util.ranking_dataframe()).mark_bar().encode(
-    x='scores',
-    y=alt.Y('names', sort=None),
-))
-
-st.header("Score evolution")
-st.line_chart(util.scores_dataframe())
-
-st.header("Score evolution last month")
-st.line_chart(util.scores_last_month_dataframe())
-# TODO: add metrics for 3 best progression over last month
-
-st.subheader("Ranking table")
-st.dataframe(util.ranking_dataframe())
-
-st.subheader("Score evolution table")
-st.dataframe(util.scores_dataframe())
+if(data_loaded):
+    st.header("Ranking of MS Cyber 2 2021-2022")
+    st.altair_chart(alt.Chart(util.ranking_dataframe()).mark_bar().encode(
+        x='scores',
+        y=alt.Y('names', sort=None),
+        # ))
+    ).properties(
+        width=500,
+        height=400
+    ))
+    # TODO: add bigger cursor
+    # TODO: make figure higher
+    st.header("Score evolution")
+    st.line_chart(util.scores_dataframe(), width=500, height=600)
+    st.header("Score evolution last month")
+    st.line_chart(util.scores_last_month_dataframe(), width=500, height=600)
+    # TODO: add metrics for 3 best progression over last month
+    st.subheader("Ranking table")
+    st.dataframe(util.ranking_dataframe())
+    st.subheader("Score evolution table")
+    st.dataframe(util.scores_dataframe())
+else:
+    st.write("No data fetched yet")
+    st.write("Please reload page when data updating is completed")
 
 # we print what is stored and update at the end (for next user/refresh)
 st.write("Data updating...")

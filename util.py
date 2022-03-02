@@ -7,7 +7,7 @@ import re
 import requests
 from bs4 import BeautifulSoup as bs
 import numpy as np
-
+from os import path
 from datetime import datetime, timedelta, date
 
 
@@ -23,17 +23,20 @@ for dt in daterange(date(2021, 9, 1), date.today()):
 num_dates = len(date_list)
 
 data_names = ["pieacoulisse", "Miaimbouchon", "BOUCENNA", "fdn4444", "miled", "Caroline-46821",
-              "Pompottewi", "Arsuol", "Yves-Marie", "Keyoke", "giso", "Yasuotarie", "Nyco"]
+              "Pompottewi", "Arsuol", "Yves-Marie", "Keyoke", "giso", "Yasuotarie"]
 # data_names = ["pieacoulisse"]
-len_data_names = len(data_names)
+# data_names_banned = ["Nyco"]
 
-df_ranking = None
-df_scores = None
+df_ranking = pd.DataFrame(columns=[])
+df_scores = pd.DataFrame(columns=[])
 
 
 def read_last_update():
-    with open("data/updated_datetime.txt", "r") as txt_file:
-        return txt_file.read()
+    if(path.exists("data/updated_datetime.txt")):
+        with open("data/updated_datetime.txt", "r") as txt_file:
+            return txt_file.read()
+    else:
+        return "Never"
 
 
 def write_last_update():
@@ -44,16 +47,27 @@ def write_last_update():
 
 
 def init_data():
+    """
+    loads initial datas (stored as csv)
+    uses global variables to store them
+
+    :return: False if data couldn't be loaded
+    """
     global df_ranking, df_scores
-    df_ranking = pd.read_csv('data/df_ranking.csv', index_col=0, sep="\t")
-    df_scores = pd.read_csv('data/df_scores.csv', index_col=0, sep="\t")
-
-    df_ranking.sort_values(by=["scores"], inplace=True, ascending=False)
-    df_ranking = df_ranking.reset_index(drop=True)
-    df_ranking.index = df_ranking.index + 1
-
-    df_scores.index = pd.to_datetime(df_scores.index)
-    return
+    result = True
+    if(path.exists("data/df_ranking.csv")):
+        df_ranking = pd.read_csv('data/df_ranking.csv', index_col=0, sep="\t")
+        df_ranking.sort_values(by=["scores"], inplace=True, ascending=False)
+        df_ranking = df_ranking.reset_index(drop=True)
+        df_ranking.index = df_ranking.index + 1
+    else:
+        result = False
+    if(path.exists("data/df_scores.csv")):
+        df_scores = pd.read_csv('data/df_scores.csv', index_col=0, sep="\t")
+        df_scores.index = pd.to_datetime(df_scores.index)
+    else:
+        result = False
+    return result
 
 
 def ranking_dataframe():
@@ -72,11 +86,17 @@ def scores_last_month_dataframe():
 
 def fetch_datas(status_text, my_bar):
     """
-    function resilitent to fetch error (put 0)
+    fetch datas from the site and grab the scores 
+
+    :param status_text: the text printed in the streamlit
+    :param my_bar: the progress bar printed in the streamlit
+    :return: a list of the scores for each player and a matrix of their score evolution (dimensions = date*players)
     """
+    status_text.text("0% Complete")
     data_score = list()
     pattern = "validations.push\({(.+?),[\s]*}\);"
     all_scores = np.zeros((num_dates, len(data_names)))
+    len_data_names = len(data_names)
     for index, name in enumerate(data_names):
         print("Fetching " + name + "...")
         url = "https://www.root-me.org/" + name + "?inc=statistiques&lang=en"
@@ -130,7 +150,16 @@ def fetch_datas(status_text, my_bar):
 
 
 def update_df_ranking(df, df_updated):
+    """
+    update existing ranking dataframe
+
+    :param df: the original dataframe containing ranking
+    :param df_updated: the fetched dataframe with new ranking
+    :return: a dataframe of the 2 combined
+    """
     print("Enter update_df_ranking")
+    if df.empty:
+        return df_updated
     for index, row in df_updated.iterrows():
         name = df_updated.loc[index, ['names']]['names']
         index_name = df.index[df['names']
@@ -152,8 +181,17 @@ def update_df_ranking(df, df_updated):
 
 
 def update_df_scores(df, df_updated):
-    # TODO; check that new values != 0 (when fetching error)
+    """
+    append new datas to the existing scores dataframe
+
+    :param df: the original dataframe containing scores
+    :param df_updated: the fetched dataframe with new scores
+    :return: a dataframe of the 2 combined
+    """
+    # TODO; check that new values != 0 (when fetching error) -> update old values (otherwise errors could stay forever)
     print("Enter update_df_scores")
+    if df.empty:
+        return df_updated
     list_col_df = df.columns.to_list()
     list_col_df_updated = df_updated.columns.to_list()
     common_col = set(list_col_df) & set(list_col_df_updated)
